@@ -179,4 +179,3 @@ def cv_draw_landmark(img_ori, pts, box=None, color=GREEN, size=1):
         cv2.line(img, left_bottom, left_top, BLUE, 1, cv2.LINE_AA)
 
     return img
-    

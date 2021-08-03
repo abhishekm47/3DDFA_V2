@@ -48,39 +48,32 @@ def main(args):
     pre_ver = None
     for i, frame in tqdm(enumerate(reader)):
         frame_bgr = frame[..., ::-1]  # RGB->BGR
+        verbose =False
+       
+        # the first frame, detect face, here we only use the first face, you can change depending on your need
+        boxes = face_boxes(frame_bgr)
+        param_lst, roi_box_lst = tddfa(frame_bgr, boxes)
+        vers = tddfa.recon_vers(param_lst, roi_box_lst, dense_flag=dense_flag)
 
-        if i == 0:
-            # the first frame, detect face, here we only use the first face, you can change depending on your need
-            boxes = face_boxes(frame_bgr)
-            boxes = [boxes[0]]
-            param_lst, roi_box_lst = tddfa(frame_bgr, boxes)
-            ver = tddfa.recon_vers(param_lst, roi_box_lst, dense_flag=dense_flag)[0]
-
-            # refine
+        # refine
+        for ver in vers:
             param_lst, roi_box_lst = tddfa(frame_bgr, [ver], crop_policy='landmark')
-            ver = tddfa.recon_vers(param_lst, roi_box_lst, dense_flag=dense_flag)[0]
-        else:
-            param_lst, roi_box_lst = tddfa(frame_bgr, [pre_ver], crop_policy='landmark')
+            landmarks = tddfa.recon_vers(param_lst, roi_box_lst, dense_flag=dense_flag)
+                
+            
+            
+            for landmark in landmarks:
+                
+                if not verbose:
+                    if args.opt == '2d_sparse':
+                        frame_bgr = cv_draw_landmark(frame_bgr, landmark)
+                    elif args.opt == '3d':
+                        frame_bgr = render(frame_bgr, [landmark], tddfa.tri)
+                    else:
+                        raise ValueError(f'Unknown opt {args.opt}')
 
-            roi_box = roi_box_lst[0]
-            # todo: add confidence threshold to judge the tracking is failed
-            if abs(roi_box[2] - roi_box[0]) * abs(roi_box[3] - roi_box[1]) < 2020:
-                boxes = face_boxes(frame_bgr)
-                boxes = [boxes[0]]
-                param_lst, roi_box_lst = tddfa(frame_bgr, boxes)
-
-            ver = tddfa.recon_vers(param_lst, roi_box_lst, dense_flag=dense_flag)[0]
-
-        pre_ver = ver  # for tracking
-
-        if args.opt == '2d_sparse':
-            res = cv_draw_landmark(frame_bgr, ver)
-        elif args.opt == '3d':
-            res = render(frame_bgr, [ver], tddfa.tri)
-        else:
-            raise ValueError(f'Unknown opt {args.opt}')
-
-        writer.append_data(res[..., ::-1])  # BGR->RGB
+                    
+        writer.append_data(frame_bgr[..., ::-1])  # BGR->RGB
 
     writer.close()
     print(f'Dump to {video_wfp}')
