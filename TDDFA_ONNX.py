@@ -26,7 +26,7 @@ class TDDFA_ONNX(object):
         # torch.set_grad_enabled(False)
 
         # load onnx version of BFM
-        bfm_fp = kvs.get('bfm_fp', make_abs_path('configs/bfm_noneck_v3.pkl'))
+        bfm_fp = "/home/ubuntu/AVSpeech-RFD/face_detection/configs/bfm_noneck_v3.pkl"
         bfm_onnx_fp = bfm_fp.replace('.pkl', '.onnx')
         if not osp.exists(bfm_onnx_fp):
             convert_bfm_to_onnx(
@@ -50,7 +50,7 @@ class TDDFA_ONNX(object):
             'param_mean_std_fp', make_abs_path(f'configs/param_mean_std_62d_{self.size}x{self.size}.pkl')
         )
 
-        onnx_fp = kvs.get('onnx_fp', kvs.get('checkpoint_fp').replace('.pth', '.onnx'))
+        onnx_fp = '/home/ubuntu/AVSpeech-RFD/face_detection/weights/mb1_120x120.onnx'
 
         # convert to onnx online if not existed
         if onnx_fp is None or not osp.exists(onnx_fp):

@@ -26,7 +26,7 @@ def main(args):
     if args.onnx:
         import os
         os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-        os.environ['OMP_NUM_THREADS'] = '4'
+        os.environ['OMP_NUM_THREADS'] = '72'
 
         from FaceBoxes.FaceBoxes_ONNX import FaceBoxes_ONNX
         from TDDFA_ONNX import TDDFA_ONNX
